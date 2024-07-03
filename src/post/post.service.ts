@@ -26,18 +26,16 @@ export class PostService {
     }
   }
 
-  findAll() {
-    const postList = this.postRepository.createQueryBuilder('post').getMany();
-    return postList;
+  async findAll(): Promise<PostEntity[]> {
+    return await this.postRepository.find({ relations: ['category'] });
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     try {
-      const post = this.postRepository.createQueryBuilder('post')
-        .where('post.id = :id', { id: id })
-        .getOne();
-
-        return post;
+      return await  this.postRepository.findOne({
+        where: {id},
+        relations: { category:true }
+      });
     } catch (error) {
       throw new HttpException(
         error.message,
@@ -47,17 +45,9 @@ export class PostService {
 
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
+  async update(id: number, updatePostDto: UpdatePostDto) {
     try {
-      const post = this.postRepository.createQueryBuilder('post')
-       .where('post.id = :id', { id: id })
-       .update(updatePostDto)
-       .execute()
-       .then(result => {
-          return result;
-        });
-
-       return post;
+      return await this.postRepository.update({id}, updatePostDto)
     } catch (error) {
       throw new HttpException(
         error.message,
@@ -66,14 +56,10 @@ export class PostService {
     }
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     try {
-      const post = this.postRepository.createQueryBuilder('post')
-       .where('post.id = :id', { id: id })
-       .delete()
-       .execute()
-
-       return post;
+      const post: PostEntity = await this.findOne(id);
+      return await this.postRepository.remove(post);
     } catch (error) {
       throw new HttpException(
         error.message,
