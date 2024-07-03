@@ -14,7 +14,6 @@ export class PostService {
   ) {}
 
   create(createPostDto: CreatePostDto) {
-    console.log(createPostDto)
     try {
       const post = this.postRepository.create(createPostDto);
       return this.postRepository.save(post);
